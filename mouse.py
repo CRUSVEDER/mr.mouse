@@ -20,8 +20,11 @@ IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/blob/main/img/buff_mouse.png?
 
 intents = discord.Intents.default()
 intents.messages = True
-intents.message_content = True
+intents.message_content = True  # This is a privileged intent
+intents.presences = True  # This is a privileged intent
+intents.members = True  # This is a privileged intent
 
+bot = commands.Bot(command_prefix='!', intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 bot_command_channel_id = None
 last_attachment_url = None
@@ -215,8 +218,8 @@ async def before_heartbeat():
 
 # ---------------- BASIC ----------------
 
-@bot.tree.command(name="ping", description="Check bot latency", guild=discord.Object(id=GUILD_ID))
-async def ping(interaction: discord.Interaction):
+@bot.tree.command(name="latency_check", description="Check bot latency", guild=discord.Object(id=GUILD_ID))
+async def latency_check(interaction: discord.Interaction):
     latency = round(bot.latency * 1000)
     await interaction.response.send_message(f"🏓 Pong — {latency} ms")
 
