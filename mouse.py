@@ -16,7 +16,7 @@ from datetime import datetime
 
 TOKEN = "YOUR_BOT_TOKEN"
 GUILD_ID = 123456789012345678  # <-- your server ID
-IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/blob/main/img/buff_mouse.png'
+IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/blob/main/img/buff_mouse.png?raw=true'
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -218,4 +218,84 @@ async def before_heartbeat():
 @bot.tree.command(name="ping", description="Check bot latency", guild=discord.Object(id=GUILD_ID))
 async def ping(interaction: discord.Interaction):
     latency = round(bot.latency * 1000)
-    await interaction.response.send_message(f"🏓 Pong —
+    await interaction.response.send_message(f"🏓 Pong — {latency} ms")
+
+# ---------------- WHOAMI (SAFE) ----------------
+
+@bot.tree.command(name="whoami", description="Simulated host & user info", guild=discord.Object(id=GUILD_ID))
+async def whoami(interaction: discord.Interaction):
+    msg = (
+        f"👤 User: `{interaction.user}`\n"
+        f"🖥 OS (simulated): `{platform.system()}`\n"
+        f"🐍 Python: `{platform.python_version()}`\n"
+        f"⏱ Time: `{datetime.utcnow()} UTC`\n\n"
+        "⚠️ Simulation mode — no real host data collected"
+    )
+    await interaction.response.send_message(msg)
+
+# ---------------- CMD SIMULATION ----------------
+
+@bot.tree.command(name="cmd_sim", description="Simulate command execution", guild=discord.Object(id=GUILD_ID))
+@app_commands.describe(command="Command to simulate")
+async def cmd_sim(interaction: discord.Interaction, command: str):
+    fake_output = f"""
+> {command}
+
+[SIMULATION MODE]
+Command parsed successfully.
+No system command executed.
+
+MITRE ATT&CK:
+- T1059 (Command-Line Interface)
+"""
+    await interaction.response.send_message(f"```{fake_output}```")
+
+# ---------------- ATTACK CHAIN ----------------
+
+@bot.tree.command(name="attackchain", description="Red team attack lifecycle", guild=discord.Object(id=GUILD_ID))
+async def attackchain(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        "🔴 **Red Team Kill Chain**\n"
+        "1️⃣ Reconnaissance\n"
+        "2️⃣ Scanning & Enumeration\n"
+        "3️⃣ Initial Access\n"
+        "4️⃣ Privilege Escalation\n"
+        "5️⃣ Lateral Movement\n"
+        "6️⃣ Persistence\n"
+        "7️⃣ Command & Control\n"
+        "8️⃣ Exfiltration"
+    )
+
+# ---------------- MITRE ----------------
+
+@bot.tree.command(name="mitre", description="MITRE ATT&CK reference")
+@app_commands.describe(technique="Technique ID (e.g., T1059)")
+async def mitre(interaction: discord.Interaction, technique: str):
+    techniques = {
+        "T1059": "Command-Line Interface",
+        "T1071": "Application Layer Protocol",
+        "T1056": "Input Capture",
+        "T1105": "Ingress Tool Transfer"
+    }
+
+    desc = techniques.get(technique.upper(), "Technique not found")
+    await interaction.response.send_message(
+        f"🧠 **MITRE {technique.upper()}**\n{desc}\n\n"
+        "Use for detection & defense planning"
+    )
+
+# ---------------- CTF ----------------
+
+@bot.tree.command(name="ctfhelp", description="CTF checklist", guild=discord.Object(id=GUILD_ID))
+async def ctfhelp(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        "🏴 **CTF Checklist**\n"
+        "✔ nmap scan\n"
+        "✔ directory brute-force\n"
+        "✔ version vulnerabilities\n"
+        "✔ weak credentials\n"
+        "✔ SUID binaries\n"
+        "✔ cron jobs"
+    )
+
+bot.run(TOKEN)
