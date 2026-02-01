@@ -16,7 +16,7 @@ from datetime import datetime
 
 TOKEN = "YOUR_BOT_TOKEN"
 GUILD_ID = 123456789012345678  # <-- your server ID
-IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/img/buff_mouse.png'
+IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/blob/main/img/buff_mouse.png'
 
 intents = discord.Intents.default()
 intents.messages = True
