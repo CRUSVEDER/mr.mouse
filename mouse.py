@@ -15,7 +15,7 @@ import platform
 from datetime import datetime
 
 TOKEN = "YOUR_BOT_TOKEN"
-GUILD_ID = 123456789012345678  # <-- your server ID
+GUILD_ID = 1234567890123456789 # <-- your server ID
 IMAGE_URL = 'https://github.com/CRUSVEDER/mr.mouse/blob/main/img/buff_mouse.png?raw=true'
 
 intents = discord.Intents.default()
